@@ -3,6 +3,7 @@ package news.androidtv.launchonboot;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 
 import com.felkertech.settingsmanager.SettingsManager;
 
+import java.util.Collections;
 import java.util.List;
 
 import static android.view.View.GONE;
@@ -37,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         mSettingsManager = new SettingsManager(this);
         if (!mSettingsManager.getBoolean(ONBOARDING)) {
             startActivity(new Intent(this, OnboardingActivity.class));
@@ -111,10 +114,15 @@ public class MainActivity extends AppCompatActivity {
                         .setItems(getAppNames(getLauncherApps()), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                String packageName = getPackageName(getLauncherApps().get(which));
+                                final ResolveInfo info = getLauncherApps().get(which);
+
                                 mSettingsManager.setString(SettingsManagerConstants.LAUNCH_ACTIVITY,
-                                        packageName);
-                                mPackageName.setText(packageName);
+                                        info.activityInfo.applicationInfo.packageName);
+
+                                mSettingsManager.setString(SettingsManagerConstants.LAUNCH_ACTIVITY_NAME,
+                                        info.activityInfo.name);
+
+                                mPackageName.setText(info.activityInfo.applicationInfo.packageName);
                             }
                         })
                         .show();
@@ -148,13 +156,14 @@ public class MainActivity extends AppCompatActivity {
 
     public List<ResolveInfo> getLauncherApps() {
         final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
-        // Change which category is used based on form factor.
-        if (getResources().getBoolean(R.bool.IS_TV)) {
-            mainIntent.addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER);
-        } else {
-            mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        }
-        return getPackageManager().queryIntentActivities(mainIntent, 0);
+        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+
+        PackageManager packageManager = getPackageManager();
+
+        List<ResolveInfo> launchables = packageManager.queryIntentActivities(mainIntent, 0);
+        Collections.sort(launchables, new ResolveInfo.DisplayNameComparator(packageManager));
+
+        return launchables;
     }
 
     public String[] getAppNames(List<ResolveInfo> leanbackApps) {
@@ -167,10 +176,6 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, info.activityInfo.name);
         }
         return appNames;
-    }
-
-    public String getPackageName(ResolveInfo resolveInfo) {
-        return resolveInfo.activityInfo.packageName;
     }
 
     private void updateSelectionView() {

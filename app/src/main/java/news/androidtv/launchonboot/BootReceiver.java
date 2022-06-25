@@ -2,6 +2,7 @@ package news.androidtv.launchonboot;
 
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.media.tv.TvContract;
@@ -68,20 +69,15 @@ public class BootReceiver extends BroadcastReceiver {
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(i);
         } else if (!settingsManager.getString(SettingsManagerConstants.LAUNCH_ACTIVITY).isEmpty()) {
-            Intent i;
-            if (context.getResources().getBoolean(R.bool.IS_TV)) {
-                i = context.getPackageManager().getLeanbackLaunchIntentForPackage(
-                        settingsManager.getString(SettingsManagerConstants.LAUNCH_ACTIVITY));
-            } else {
-                i = context.getPackageManager().getLaunchIntentForPackage(
-                        settingsManager.getString(SettingsManagerConstants.LAUNCH_ACTIVITY));
-            }
+            final ComponentName componentName = new ComponentName(
+                    settingsManager.getString(SettingsManagerConstants.LAUNCH_ACTIVITY),
+                    settingsManager.getString(SettingsManagerConstants.LAUNCH_ACTIVITY_NAME));
 
-            if (i == null) {
-                Toast.makeText(context, R.string.null_intent, Toast.LENGTH_SHORT).show();
-                return;
-            }
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            final Intent i = new Intent(Intent.ACTION_MAIN);
+            i.addCategory(Intent.CATEGORY_LAUNCHER);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+            i.setComponent(componentName);
+
             try {
                 context.startActivity(i);
             } catch (ActivityNotFoundException e) {
