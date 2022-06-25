@@ -1,46 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="news.androidtv.launchonboot" >
+        package="news.androidtv.launchonboot">
 
     <!-- To handle boot completes -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+        </intent>
+        <package android:name="android.permission.QUERY_ALL_PACKAGES" />
+    </queries>
+
     <uses-feature
-        android:name="android.software.leanback"
-        android:required="false" />
+            android:name="android.software.leanback"
+            android:required="false" />
     <uses-feature
-        android:name="android.hardware.touchscreen"
-        android:required="false" />
+            android:name="android.hardware.touchscreen"
+            android:required="false" />
 
     <application
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:banner="@drawable/banner"
-        android:supportsRtl="true"
-        android:theme="@style/AppTheme" >
-        <activity android:name=".MainActivity"
+            android:allowBackup="true"
+            android:icon="@mipmap/ic_launcher"
+            android:label="@string/app_name"
+            android:banner="@drawable/banner"
+            android:supportsRtl="true"
+            android:theme="@style/AppTheme">
+
+        <activity
+                android:name=".MainActivity"
                 android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".OnboardingActivity"
-            android:enabled="true"
-            android:exported="true"
-            android:theme="@style/Onboard" />
+        <activity
+                android:name=".OnboardingActivity"
+                android:enabled="true"
+                android:exported="true"
+                android:theme="@style/Onboard" />
 
         <receiver
-            android:enabled="true"
-            android:exported="true"
-            android:name=".BootReceiver"
-            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+                android:enabled="true"
+                android:exported="true"
+                android:name=".BootReceiver"
+                android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -50,9 +58,10 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".DreamListenerService"
-            android:enabled="true"
-            android:exported="true" />
+        <service
+                android:name=".DreamListenerService"
+                android:enabled="true"
+                android:exported="true" />
     </application>
 
 </manifest>
